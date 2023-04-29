@@ -4,7 +4,8 @@ Understanding how cells communicate and interact with each other is critical for
 
 ScRNA-seq is a technique that allows researchers to measure gene expression in individual cells. By analyzing the expression patterns of thousands of genes across many individual cells, scRNA-seq can reveal which cells communicate with each other, what types of signals are being exchanged, and how these signals are being transmitted.
 
-![IMG_0559](https://user-images.githubusercontent.com/117299113/235289278-3d364377-40fa-4bdc-b2e6-0ce3db7a086a.jpeg)
+
+<img width="571" alt="Screenshot 2023-04-29 at 1 34 32 AM" src="https://user-images.githubusercontent.com/117299113/235289729-32f80a37-5673-43ba-95bc-489cb08982f1.png">
 
 ## Overview of the Project
 
