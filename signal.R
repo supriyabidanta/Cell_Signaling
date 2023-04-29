@@ -1,7 +1,7 @@
 system("ls")
 system("mkdir -p Signaling/{Data,Images,Output}")
 system("pwd")
-system("./fetch_data.sh")
+system("./Cell_Signaling/Cell_Signaling/fetch_data.sh")
 
 #################### Installations ################
 install.packages("anndata")
@@ -153,22 +153,16 @@ FeaturePlot(data_rds_copy, features = c(G_list$hgnc_symbol))
 dev.off()
 
 plot <- FeaturePlot(data_rds_copy, features = 'APOE')
-Hplot <- HoverLocator(plot=plot, infromation=FetchData(data_rds_copy, vars=c("cell_type",'nCount_RNA')))
+Hplot <- HoverLocator(plot=plot, infromation=FetchData(data_rds_copy, vars=data_rds_copy@meta.data$cell_type))
 htmlwidgets::saveWidget(widget = Hplot, file = 'Signaling/Images/APOE.html', selfcontained = TRUE)
 #######################################################################
 
 ######################### CellChat ##########################################
 
-data_rds_3 <- data_rds
-
-data_rds_3 <- NormalizeData(object = data_rds_3)
-rownames(data_rds@assays$RNA@counts) <- data_rds@assays$RNA@meta.features$feature_name
-rownames(data_rds@assays$RNA@data) <- data_rds@assays$RNA@meta.features$feature_name
-
-genes <- c(rownames(data_rds_3@assays$RNA@data))
-data.input <- data_rds_3@assays$RNA@data # normalized data matrix
-Idents(data_rds_3) <- 'cell_type'
-labels <- Idents(data_rds_3)
+genes <- c(rownames(data_rds_copy@assays$RNA@data))
+data.input <- data_rds_copy@assays$RNA@data # normalized data matrix
+Idents(data_rds_copy) <- 'cell_type'
+labels <- Idents(data_rds_copy)
 labels
 meta <- data.frame(group = labels, row.names = names(labels))
 head(meta)# create a dataframe of the cell labels
@@ -202,33 +196,36 @@ cellchat <- aggregateNet(cellchat)
 
 groupSize <- as.numeric(table(cellchat@idents))
 netVisual_circle(cellchat@net$count,vertex.weight = groupSize,weight.scale = T, label.edge = F, title.name = "Interactions")
-netVisual_circle(cellchat@net$weight,vertex.weight = groupSize,weight.scale = T, label.edge = F, title.name = "Interactions")
 
 setwd("Signaling/Images")
 
 pathways.show.all <- cellchat@netP$pathways
 for (i in 1:length(pathways.show.all)) {
+  vertex.receiver = seq(1,5)
   netVisual(cellchat, signaling = pathways.show.all[i], vertex.receiver = vertex.receiver, layout = "hierarchy")
   gg <- netAnalysis_contribution(cellchat, signaling = pathways.show.all[i])
-  ggsave(filename=paste0(pathways.show.all[i], "_L-R_info.pdf"), plot=gg, width = 3, height = 2, units = 'in', dpi = 300)
+  ggsave(filename=paste0(pathways.show.all[i], "_L-R_info.pdf"), plot=gg, width = 5, height = 8, units = 'in', dpi = 300)
 }
 
-protein = c("EGF","MK")
+protein = c("EGF","KIT")
 for (i in 1:length(protein)){
   pathways.show <- protein[i] 
-  vertex.receiver = seq(1,5) 
-  pdf(file = paste0(protein[i] ,".pdf"),width = 10, height = 8)
-  netVisual_aggregate(cellchat, signaling = pathways.show,  vertex.receiver = vertex.receiver)
+  vertex.receiver = seq(1,4) 
+  par(mfrow=c(1,1))
+  png(file = paste0(protein[i] ,".png"), width = 1500, height =  1000)
+  netVisual_aggregate(cellchat, signaling = pathways.show,  vertex.receiver = vertex.receiver,layout = c("hierarchy"))
   dev.off()
-  pdf(file = paste0(protein[i] ,"_circle.pdf"),width = 10, height = 8)
+  png(file = paste0(protein[i] ,"_circle.png"), width = 800, height =  1000)
   netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
   dev.off()
   # Heatmap for analysing interactions
+  png(file = paste0(protein[i] ,"_HM.png"),width = 1200, height = 800)
   netVisual_heatmap(cellchat, signaling = pathways.show, color.heatmap = "Reds")
+  dev.off()
 }
 
-pdf(file = "EGF_VEGF.pdf", width = 10, height = 8)
-netVisual_bubble(cellchat, signaling = c("EGF","VEGF"))
+png(file = "KIT_EGF.png")
+netVisual_bubble(cellchat, signaling = c("KIT","EGF"))
 dev.off()
 
 
